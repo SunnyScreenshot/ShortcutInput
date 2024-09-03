@@ -2,7 +2,9 @@
 #include <QFocusEvent>
 #include <QDebug>
 
+#ifdef Q_OS_WIN
 HHOOK ShortcutLineEdit::hook = nullptr;
+#endif
 ShortcutLineEdit* ShortcutLineEdit::focusedInstance = nullptr;
 
 ShortcutLineEdit::ShortcutLineEdit(QWidget *parent)
@@ -19,11 +21,13 @@ ShortcutLineEdit::ShortcutLineEdit(const QKeySequence &keySequence, QWidget *par
 
 ShortcutLineEdit::~ShortcutLineEdit()
 {
+#ifdef Q_OS_WIN
     // Cleanup the hook when no more instances exist
     if (hook && !focusedInstance) {
         UnhookWindowsHookEx(hook);
         hook = nullptr;
     }
+#endif
 }
 
 void ShortcutLineEdit::setKeySequence(const QKeySequence &keySequence)
@@ -32,6 +36,7 @@ void ShortcutLineEdit::setKeySequence(const QKeySequence &keySequence)
         m_keySequence = keySequence;
         updateText();
         emit keySequenceChanged(m_keySequence);
+        qDebug() << "emit keySequenceChanged():" << m_keySequence;
     }
 }
 
@@ -40,15 +45,16 @@ QKeySequence ShortcutLineEdit::keySequence() const
     return m_keySequence;
 }
 
-
 void ShortcutLineEdit::initUI()
 {
     setAlignment(Qt::AlignCenter);  // Center-align text
     setReadOnly(true);              // Make the line edit read-only initially
     setPlaceholderText(tr("Press shortcut"));
+#ifdef Q_OS_WIN
     if (!hook) {
         hook = SetWindowsHookEx(WH_KEYBOARD_LL, LowLevelKeyboardProc, GetModuleHandle(NULL), 0);
     }
+#endif
 }
 
 void ShortcutLineEdit::updateText()
@@ -66,7 +72,6 @@ void ShortcutLineEdit::handlePrintScreen()
     setKeySequence(keySequence);
     emit keySequenceChanged(keySequence);
 }
-
 
 void ShortcutLineEdit::keyPressEvent(QKeyEvent *event)
 {
@@ -102,7 +107,7 @@ void ShortcutLineEdit::focusOutEvent(QFocusEvent *event)
     QLineEdit::focusOutEvent(event);
 }
 
-
+#ifdef Q_OS_WIN
 LRESULT CALLBACK ShortcutLineEdit::LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
     if (nCode == HC_ACTION) {
@@ -115,3 +120,4 @@ LRESULT CALLBACK ShortcutLineEdit::LowLevelKeyboardProc(int nCode, WPARAM wParam
     }
     return CallNextHookEx(hook, nCode, wParam, lParam);
 }
+#endif

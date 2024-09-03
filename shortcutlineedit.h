@@ -4,7 +4,10 @@
 #include <QLineEdit>
 #include <QKeyEvent>
 #include <QKeySequence>
+
+#ifdef Q_OS_WIN
 #include <windows.h> // For global keyboard hook
+#endif
 
 class ShortcutLineEdit : public QLineEdit
 {
@@ -17,11 +20,6 @@ public:
     void setKeySequence(const QKeySequence &keySequence);
     QKeySequence keySequence() const;
 
-private:
-    void initUI();
-    void updateText();
-    void handlePrintScreen();
-
 signals:
     void keySequenceChanged(const QKeySequence &keySequence);
 
@@ -32,10 +30,17 @@ protected:
     void focusOutEvent(QFocusEvent *event) override;
 
 private:
-    QKeySequence m_keySequence;
+    void initUI();
+    void updateText();
+    void handlePrintScreen();
+
+#ifdef Q_OS_WIN
     static HHOOK hook;
-    static ShortcutLineEdit* focusedInstance; // Static pointer to the focused instance
     static LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
+#endif
+
+    QKeySequence m_keySequence;
+    static ShortcutLineEdit* focusedInstance; // Static pointer to the focused instance
 };
 
 #endif // SHORTCUTLINEEDIT_H
