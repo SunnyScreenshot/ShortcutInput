@@ -24,7 +24,20 @@
     <widget class="ShortcutLineEdit" name="lineEdit_2"/>
    </item>
    <item>
-    <widget class="QLineEdit" name="lineEdit"/>
+    <widget class="ShortcutLineEdit" name="lineEdit_3"/>
+   </item>
+   <item>
+    <widget class="ShortcutLineEdit" name="lineEdit_4"/>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="lineEdit">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="placeholderText">
+      <string/>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

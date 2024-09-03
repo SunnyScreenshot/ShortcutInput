@@ -1,23 +1,29 @@
 #include "shortcutlineedit.h"
-
-#include <QApplication>
-#include <QPainter>
-#include <QStyleOptionFrame>
+#include <QFocusEvent>
 #include <QDebug>
+
+HHOOK ShortcutLineEdit::hook = nullptr;
+ShortcutLineEdit* ShortcutLineEdit::focusedInstance = nullptr;
 
 ShortcutLineEdit::ShortcutLineEdit(QWidget *parent)
     : QLineEdit(parent)
 {
-    setAlignment(Qt::AlignCenter);  // Center-align text
-    setReadOnly(true);              // Make the line edit read-only
+    initUI();
 }
 
 ShortcutLineEdit::ShortcutLineEdit(const QKeySequence &keySequence, QWidget *parent)
     : QLineEdit(parent), m_keySequence(keySequence)
 {
-    setAlignment(Qt::AlignCenter);  // Center-align text
-    setReadOnly(true);              // Make the line edit read-only
-    updateText();
+    initUI();
+}
+
+ShortcutLineEdit::~ShortcutLineEdit()
+{
+    // Cleanup the hook when no more instances exist
+    if (hook && !focusedInstance) {
+        UnhookWindowsHookEx(hook);
+        hook = nullptr;
+    }
 }
 
 void ShortcutLineEdit::setKeySequence(const QKeySequence &keySequence)
@@ -34,24 +40,41 @@ QKeySequence ShortcutLineEdit::keySequence() const
     return m_keySequence;
 }
 
+
+void ShortcutLineEdit::initUI()
+{
+    setAlignment(Qt::AlignCenter);  // Center-align text
+    setReadOnly(true);              // Make the line edit read-only initially
+    setPlaceholderText(tr("Press shortcut"));
+    if (!hook) {
+        hook = SetWindowsHookEx(WH_KEYBOARD_LL, LowLevelKeyboardProc, GetModuleHandle(NULL), 0);
+    }
+}
+
+void ShortcutLineEdit::updateText()
+{
+    if (m_keySequence.isEmpty()) {
+        setText(QString());
+    } else {
+        setText(m_keySequence.toString(QKeySequence::NativeText));
+    }
+}
+
+void ShortcutLineEdit::handlePrintScreen()
+{
+    QKeySequence keySequence(Qt::Key_Print);
+    setKeySequence(keySequence);
+    emit keySequenceChanged(keySequence);
+}
+
+
 void ShortcutLineEdit::keyPressEvent(QKeyEvent *event)
 {
-    // Handle modifier keys and regular keys separately
     if (event->key() == Qt::Key_Backspace || event->key() == Qt::Key_Delete) {
         setKeySequence(QKeySequence()); // Clear key sequence
-    // } else if (event->modifiers() == Qt::NoModifier) {
-    //     // Handle keys with no modifier
-    //     QKeySequence newSequence(event->key());
-    //     setKeySequence(newSequence);
+    } else if (event->key() == Qt::Key_Shift || event->key() == Qt::Key_Control || event->key() == Qt::Key_Alt || event->key() == Qt::Key_Meta) {
+        return; // Do not update key sequence for modifier keys only
     } else {
-        // Handle keys with modifiers
-        // event->key()
-
-        if (event->key() == Qt::Key_Shift || event->key() == Qt::Key_Control || event->key() == Qt::Key_Alt) {
-            // Do not update key sequence for modifier keys only
-            return;
-        }
-
         QKeySequence newSequence(event->key() | event->modifiers());
         setKeySequence(newSequence);
     }
@@ -62,15 +85,33 @@ void ShortcutLineEdit::keyPressEvent(QKeyEvent *event)
 
 void ShortcutLineEdit::keyReleaseEvent(QKeyEvent *event)
 {
-    // Optional: Handle key release events if needed
     event->ignore(); // Ignore to prevent default behavior
 }
 
-void ShortcutLineEdit::updateText()
+void ShortcutLineEdit::focusInEvent(QFocusEvent *event)
 {
-    if (m_keySequence.isEmpty()) {
-        setText(QString());
-    } else {
-        setText(m_keySequence.toString(QKeySequence::NativeText));
+    focusedInstance = this; // Set the static pointer to this instance
+    QLineEdit::focusInEvent(event);
+}
+
+void ShortcutLineEdit::focusOutEvent(QFocusEvent *event)
+{
+    if (focusedInstance == this) {
+        focusedInstance = nullptr; // Clear the static pointer if this instance loses focus
     }
+    QLineEdit::focusOutEvent(event);
+}
+
+
+LRESULT CALLBACK ShortcutLineEdit::LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
+{
+    if (nCode == HC_ACTION) {
+        KBDLLHOOKSTRUCT *pKeyboard = (KBDLLHOOKSTRUCT *)lParam;
+        if (wParam == WM_KEYDOWN && pKeyboard->vkCode == VK_SNAPSHOT) {
+            if (focusedInstance) {
+                focusedInstance->handlePrintScreen();
+            }
+        }
+    }
+    return CallNextHookEx(hook, nCode, wParam, lParam);
 }
