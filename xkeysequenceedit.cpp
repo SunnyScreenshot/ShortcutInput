@@ -2,6 +2,7 @@
 #include <QWidget>
 #include <QMouseEvent>
 #include <QDebug>
+#include <QTextEdit>
 
 /*!
  * \brief The XKeySequenceEdit class 设置仅接受一个快捷键组合；删除清空
@@ -21,25 +22,8 @@ XKeySequenceEdit::XKeySequenceEdit(const QKeySequence &keySequence, QWidget *par
 
 void XKeySequenceEdit::initUI()
 {
-    //setWindowFlags(Qt::FramelessWindowHint | Qt::Popup);
 }
 
-//void XKeySequenceEdit::test()
-//{
-//	connect(this, &XKeySequenceEdit::keySequenceChanged, this, &XKeySequenceEdit::onKeySequenceChanged);
-
-//	connect(this, &XKeySequenceEdit::editingFinished, this, &XKeySequenceEdit::onEditingFinished);
-//}
-
-//void XKeySequenceEdit::onEditingFinished()
-//{
-//	qInfo() << "editingFinished    ------------>" << keySequence() << keySequence().count();
-//}
-
-//void XKeySequenceEdit::onKeySequenceChanged(const QKeySequence & keySequence)
-//{
-//	qInfo() << "keySequenceChanged ------------>" << keySequence << keySequence.count();
-//}
 
 // Ref: https://jishurizhi.com/p-74.html
 void XKeySequenceEdit::keyPressEvent(QKeyEvent *event)
@@ -61,13 +45,3 @@ void XKeySequenceEdit::keyPressEvent(QKeyEvent *event)
     setKeySequence(key);
     emit sigKeySeqChanged(key); // 要发射对应信号
 }
-
-//void XKeySequenceEdit::mousePressEvent(QMouseEvent* event)
-//{
-//    int a = 0;
-//    if (event->button() != Qt::LeftButton)
-//        return;
-//
-//    if (!geometry().contains(mapFromGlobal(QCursor::pos())))
-//        clearFocus();
-//}

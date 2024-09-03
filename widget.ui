@@ -18,7 +18,13 @@
     <widget class="XKeySequenceEdit" name="keySequenceEdit"/>
    </item>
    <item>
-    <widget class="XKeySequenceEdit" name="keySequenceEdit_2"/>
+    <widget class="QKeySequenceEdit" name="keySequenceEdit_2"/>
+   </item>
+   <item>
+    <widget class="ShortcutLineEdit" name="lineEdit_2"/>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="lineEdit"/>
    </item>
   </layout>
  </widget>
@@ -27,6 +33,11 @@
    <class>XKeySequenceEdit</class>
    <extends>QKeySequenceEdit</extends>
    <header>xkeysequenceedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ShortcutLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>shortcutlineedit.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

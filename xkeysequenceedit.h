@@ -1,10 +1,9 @@
 ﻿#ifndef XKEYSEQUENCEEDIT_H
 #define XKEYSEQUENCEEDIT_H
 
-#include "xwidgets_global.h"
 #include <QKeySequenceEdit>
 
-class XWIDGETS_EXPORT XKeySequenceEdit : public QKeySequenceEdit
+class XKeySequenceEdit : public QKeySequenceEdit
 {
     Q_OBJECT
 public:
@@ -15,18 +14,11 @@ public:
 private:
     void initUI();
 
-//	void test();
-
 signals:
     void sigKeySeqChanged(const QKeySequence &keySequence);
 
-//public slots:
-    //void onEditingFinished();
-    //void onKeySequenceChanged(const QKeySequence &keySequence);
-
 protected:
     void keyPressEvent(QKeyEvent *event) override;
-    //void mousePressEvent(QMouseEvent* event) override;
 };
 
 

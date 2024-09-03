@@ -40,6 +40,7 @@ else()
     else()
         add_executable(untitled4
             ${PROJECT_SOURCES}
+            shortcutlineedit.h shortcutlineedit.cpp
 
 
         )
