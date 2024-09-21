@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(untitled4 VERSION 0.1 LANGUAGES CXX)
+project(ShortcutInput VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -19,43 +19,19 @@ set(PROJECT_SOURCES
         widget.ui
         xkeysequenceedit.h
         xkeysequenceedit.cpp
+        shortcutlineedit.h
+        shortcutlineedit.cpp
 )
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(untitled4
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-    )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET untitled4 APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
-else()
-    if(ANDROID)
-        add_library(untitled4 SHARED
-            ${PROJECT_SOURCES}
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(untitled4
-            ${PROJECT_SOURCES}
-            shortcutlineedit.h shortcutlineedit.cpp
+add_executable(ShortcutInput ${PROJECT_SOURCES})
+
+target_link_libraries(ShortcutInput PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
 
-        )
-    endif()
-endif()
-
-target_link_libraries(untitled4 PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-
-# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
-# If you are developing for iOS or macOS you should consider setting an
-# explicit, fixed bundle identifier manually though.
 if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.untitled4)
+  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.ShortcutInput)
 endif()
-set_target_properties(untitled4 PROPERTIES
+set_target_properties(ShortcutInput PROPERTIES
     ${BUNDLE_ID_OPTION}
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -64,12 +40,12 @@ set_target_properties(untitled4 PROPERTIES
 )
 
 include(GNUInstallDirs)
-install(TARGETS untitled4
+install(TARGETS ShortcutInput
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(untitled4)
+    qt_finalize_executable(ShortcutInput)
 endif()
